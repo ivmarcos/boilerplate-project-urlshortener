@@ -4,7 +4,6 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const app = express();
 
-
 // Basic Configuration
 const port = process.env.PORT || 3000;
 
@@ -24,12 +23,13 @@ app.get('/api/hello', function(req, res) {
 });
 
 
-function isUrlValid(userInput) {
-  const res = userInput.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
-  if(res == null){
-    return false;
+function isUrlValid(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch (err) {
+    return false;  
   }
-  return true;
 }
 
 const shortURLMap = new Map();
@@ -51,7 +51,7 @@ function findOrCreateShortURL(url){
   return shortURL;
 }
 
-app.post('/api/shorturl', function(req, res){
+app.post('/api/shorturl', async function(req, res){
   const url = req.body.url
   if (!isUrlValid(url)){
     res.json({
