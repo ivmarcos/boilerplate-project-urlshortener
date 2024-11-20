@@ -24,12 +24,12 @@ app.get('/api/hello', function(req, res) {
 });
 
 
-const parseURL = (value) => {
-  try {
-    return new URL(value)
-  }catch(err){
-    return null;
+function isUrlValid(userInput) {
+  const res = userInput.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
+  if(res == null){
+    return false;
   }
+  return true;
 }
 
 const shortURLMap = new Map();
@@ -52,16 +52,16 @@ function findOrCreateShortURL(url){
 }
 
 app.post('/api/shorturl', function(req, res){
-  const url = parseURL(req.body.url);
-  if (!url){
+  const url = req.body.url
+  if (!isUrlValid(url)){
     res.json({
       error: 'invalid url'
     });
     return;
   }
-  const shortUrl = findOrCreateShortURL(req.body.url);
+  const shortUrl = findOrCreateShortURL(url);
   res.json({
-    original_url: req.body.url,
+    original_url: url,
     short_url: shortUrl
   })
 })
